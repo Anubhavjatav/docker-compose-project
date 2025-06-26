@@ -1,0 +1,48 @@
+services:
+  nginx:
+    build:
+      context: ./nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      service_1:
+        condition: service_healthy
+      service_2:
+        condition: service_healthy
+    networks:
+      - my-bridge-net
+
+  service_1:
+    build:
+      context: ./service_1
+    container_name: service_1
+    expose:
+      - "5000"
+    networks:
+      - my-bridge-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  service_2:
+    build:
+      context: ./service_2
+    container_name: service_2
+    expose:
+      - "5000"
+    networks:
+      - my-bridge-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+networks:
+  my-bridge-net:
+    driver: bridge
+
